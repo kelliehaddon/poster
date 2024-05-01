@@ -1,0 +1,315 @@
+---
+title: "Academic Posters"
+subtitle: "Sharing complex research"
+author: "Austin Hart, Ph.D."
+date: "American University"
+output:
+  xaringan::moon_reader:
+    lib_dir: libs
+    css: 
+      - default
+      - css/nhsr.css
+      - css/nhsr-fonts.css
+    seal: false
+    nature:
+      highlightStyle: github
+      highlightLines: true
+      ratio: "16:9"
+    includes:
+      after_body: [css/insert-logo.html]
+---
+
+
+```{r setup, include = FALSE}
+## Libraries
+  library(tidyverse)
+  library(knitr)
+  library(rmdformats)
+  library(modelsummary)
+  library(gt)
+
+## Global options
+  knitr::opts_chunk$set(
+    echo = FALSE, 
+    prompt = FALSE,
+    tidy = FALSE, 
+    comment = NA,
+    message = FALSE, 
+    warning = FALSE,
+    dev = 'CairoSVG',
+    fig.align = 'center'
+)
+  
+  xaringanExtra::use_panelset()
+  options(modelsummary_factory_default = "gt")
+```
+
+class: title-slide, left, bottom
+
+# `r rmarkdown::metadata$title`
+----
+## **`r rmarkdown::metadata$subtitle`**
+### `r rmarkdown::metadata$author`
+### `r rmarkdown::metadata$date`
+
+
+---
+# Academic posters
+### Complex research in a static but engaging format
+
+- Commonly used at:
+
+  - Conferences  
+
+  - Exhibitions
+
+  - Seminars
+  
+- Primary functions:
+
+  - Stimulate interest in your research
+  
+  - Present complex findings **succinctly**
+  
+  - Facilitate networking, engage peers and experts
+  
+
+---
+class: inverse, middle, center
+
+# Poster $\neq$ paper
+## It's a whole different thing.
+
+
+---
+# Core elements of a poster
+
+- **Title** <br> Clear and concise, reflecting the poster's content.
+
+- **Abstract** <br> A brief overview of the research question, methodology, and major findings.
+
+- **Background** <br> Contextualizes the research question or central argument.
+
+- **Methods/Data** <br>  Describes how you conducted the study.
+
+- **Results** <br> Visuals and text highlighting key findings.
+
+- **Discussion** <br> Interpretation of results and implications,
+
+- **Acknowledgments** <br> Credits funding, support, and contributions.
+
+
+---
+class: inverse, middle
+
+# Design Principles for Effective Posters
+
+**Clarity** <br> Use clear, easy-to-read fonts and colors that contrast well.
+
+**Simplicity** <br> Keep the layout simple and uncluttered.
+
+**Visual Appeal** <br> Use charts, graphs, images, and bullet points to break up text and convey information visually.
+
+**Consistency** <br> Maintain consistent use of fonts, colors, and headings.
+
+**Accessibility** <br> Ensure the poster is accessible to people with disabilities (e.g., colorblind-friendly palettes).
+
+
+---
+# What about content?
+
+- Focus on Key Messages <br> Highlight the most important findings or ideas.
+
+- Engage the Audience <br> Use questions or intriguing statements to provoke interest.
+
+- Interactive Elements <br> Consider adding QR codes linking to further info or digital copies of the poster or paper.
+
+- Practice Your Pitch <br> Be ready to explain your poster briefly.
+
+---
+class: inverse, middle
+
+# Presenting Your Poster
+
+- Prepare a short summary speech (around 2-3 minutes) to introduce your poster.
+
+- Be ready to answer questions and engage in discussions.
+
+- Network: Use your poster as a conversation starter to network with other researchers.
+
+
+---
+# Poster 2.0 with `posterdown`
+
+.panelset[
+  .panel[.panel-name[Examples]
+
+  [Example 1](https://pbs.twimg.com/media/D9Qf0JDX4AEXJRd.jpg:large): From the `posterdown` site
+  
+  [Example 2](https://curtisnedhansen.github.io/ExamplePoster/): From last term
+  
+  [Example 3](https://tanvidani.github.io/Portfolio-Poster/): From last term
+
+  ]
+
+  
+  .panel[.panel-name[Getting started]
+  
+- Install `posterdown`: `install.packages('posterdown')`
+
+- Start a new poster: `File -> New -> RMarkdown -> From Template -> posterdown_betterland`
+
+- Save, `knit`, and then edit.
+
+  ]
+
+  .panel[.panel-name[`yaml`]
+  
+.pull-left[
+
+```yaml
+---
+main_topsize: 0.2 #percent coverage of the poster
+main_bottomsize: 0.1
+#ESSENTIALS
+title: '**A Better Reproducible Poster Title**'
+author:
+  - name: '**Austin Hart**'
+    affil: 1
+    main: true
+    email: ahart@american.edu
+affiliation:
+  - num: 1
+    address: PGE, American University 
+main_findings:
+  - "If you cite me I earn more money."
+# continues...
+```
+]
+
+.pull-right[
+```yaml
+# continued...
+primary_colour: "#0063B2FF"
+secondary_colour: "#9CC3D5FF"
+accent_colour: "#cc0000"
+output: 
+  posterdown::posterdown_betteport:
+    self_contained: true  # MOST IMPORTANT!
+    pandoc_args: --mathjax
+    number_sections: false
+link-citations: true
+knit: pagedown::chrome_print # for pdf
+```
+]
+
+  
+  ]
+  
+  .panel[.panel-name[Setup]
+  
+As always, you need a setup chunk:
+
+```{r, echo=TRUE, eval=FALSE}
+## Packages
+  library(tidyverse)
+  library(knitr)
+  library(modelsummary)
+  library(gt)
+```
+
+```{r, echo = T, eval = F}
+## Options
+  knitr::opts_chunk$set(
+    echo = FALSE, 
+    comment = NA,
+    message = FALSE, 
+    warning = FALSE,
+    fig.align = 'center'
+  )
+  options(modelsummary_factory_default = "gt")
+
+```
+  
+  ]
+  
+  .panel[.panel-name[Body]
+
+Organize like any report. Just write and code. 
+
+Use appropriate (level-1) sections for structure.
+
+Break up text with images: visuals/tables over text.
+
+Use `<br>` for hard column jumps.
+
+`knit` often.
+  
+  ]
+  
+  .panel[.panel-name[OLS]
+  
+Format regression tables with clear names. Highlight key estimates where you can. Or use a coefficient plot.
+
+
+```{r, echo = T, eval = F}
+## Estimates  
+  mods = list(
+    '(1)' = lm(Sepal.Length ~ Petal.Length + Sepal.Width, iris),
+    '(2)' = lm(Sepal.Length ~ Petal.Length + Sepal.Width + Species, iris)
+  )
+
+## Table  
+  modelsummary(mods, 
+    gof_map = 'nobs', statistic = NULL, 
+    stars = c('*' = 0.05),
+  ) |>
+  tab_style(style = cell_fill(color = 'lightblue'),
+            locations = cells_body(rows = 1))
+
+## Coefficient plot  
+  modelplot(mods, coef_omit = c(-2, -3)) +
+  scale_x_continuous(limits = c(0,1))
+```
+
+  ]
+  
+.panel[.panel-name[output]  
+
+.pull-left[
+```{r}
+## Estimates  
+  mods = list(
+    '(1)' = lm(Sepal.Length ~ Petal.Length + Sepal.Width, iris),
+    '(2)' = lm(Sepal.Length ~ Petal.Length + Sepal.Width + Species, iris)
+  )
+
+## Table  
+  modelsummary(mods, fmt = fmt_significant(2), 
+    gof_map = 'nobs', statistic = NULL,
+    stars = c('*' = 0.05), title = 'DV: Sepal Length',
+    coef_map = c(
+      'Petal.Length' = 'Petal length',
+      'Sepal.Width' = 'Sepal width',
+      'Speciesversicolor' = 'Versicolor',
+      'Speciesvirginica' = 'Virginica',
+      '(Intercept)' = '(Intercept)'
+    )
+  ) |>
+  tab_style(style = cell_text(color = 'red'),
+            locations = cells_body(rows = 1)) 
+    
+```
+]
+.pull-right[
+```{r, fig.dim=c(4,4)}
+## plot
+  modelplot(mods, coef_omit = c(-2, -3)) +
+  scale_x_continuous(limits = c(0,1)) +
+  labs(x = 'OLS estimate') +
+  theme_classic(base_size = 12) + coord_flip()
+    
+```
+]
+]
+]

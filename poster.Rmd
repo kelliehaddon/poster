@@ -1,0 +1,237 @@
+---
+main_topsize: 0.1 #percent coverage of the poster
+main_bottomsize: 0.05
+#ESSENTIALS
+title: '**Women and World Peace**'
+author:
+  - name: '**Kellie Haddon**'
+    affil: 1
+    main: true
+    email: kh7329a@american.edu
+affiliation:
+  - num: 1
+    address: School of International Service, American University
+main_findings:
+  - "Countries with **greater women's political empowerment** experience **more peace**."
+primary_colour: "#af4b91"
+secondary_colour: "#d7642c" 
+accent_colour: "#d7642c"
+output: 
+  posterdown::posterdown_betterport:
+    self_contained: true # allows to send html
+    pandoc_args: --mathjax
+    number_sections: false
+link-citations: true
+knit: pagedown::chrome_print # for pdf
+---
+
+```{r, include=FALSE}
+#knitr::opts_chunk$set(echo = FALSE,
+                     # warning = FALSE,
+                      #tidy = FALSE,
+                      #message = FALSE,
+                      #fig.align = 'center',
+                      #out.width = "100%")
+#options(knitr.table.format = "html") 
+#options(modelsumary_factory_default = 'gt')
+
+knitr::opts_chunk$set(
+    echo = FALSE, 
+    comment = NA,
+    message = FALSE, 
+    warning = FALSE,
+    fig.align = 'center',
+    out.width = "100%"
+  )
+  options(modelsummary_factory_default = "gt")
+
+# packages
+library(tidyverse)
+library(knitr)
+library(readxl)
+library(haven)
+library(janitor)
+library(modelsummary)
+library(lfe)
+library(gt)
+library(corrr)
+library(ggrepel)
+library(kableExtra)
+library(patchwork)
+
+# data
+df = read_xlsx('qog_bas_cs_jan24.xlsx')
+
+```
+
+# Introduction
+
+In the movie [Miss Congeniality (2000)](https://www.youtube.com/watch?v=B1ZOWwW2agQ), contestants in the Miss United States pageant are asked the question “What is the one most important thing our society needs?” to which the women all give the classic answer: world peace. But what role do women play in achieving the lofty goal of world peace? Well, according to Hudson et al. (2014), women have everything to do with world peace. Hudson et al. argue that gender inequality is linked, both empirically and theoretically, to national and international security in their book _Sex and World Peace_. While the book discusses women’s security and gender equality in a variety of areas, this analysis focuses on women’s political empowerment. Making this linkage is important as it can guide policymakers, practitioners, and world leaders to know where to focus efforts to achieve the goal of world peace.
+
+**Research question:** What impact does women’s political empowerment on world peace?
+
+The expected result of this analysis is to find a positive relationship between women’s political empowerment and world peace. 
+
+# Methods
+
+The data used in this analysis was compiled by Dahlberg et al. (2024) from the Quality of Government (QOG) Institute, pulling from a variety of publicly available datasets. This data is from 2020 and includes indicators from 194 countries on a variety of areas such as culture, conflict, education, gender equality, political system, and economics.
+
+The variables used in this analysis include the following:
+
+- **Women's Political Empowerment Index**: Values fall on a continuous scale from 0-1, with 1 indicating higher political empowerment. This index incorporates three dimensions: fundamental civil liberties, women’s open discussion of political issues and participation in civil society organizations, and the representation of women in formal political positions (Pemstein et al., 2023).
+- **Global Peace Index**: Values fall on a continuous scale ranging from 1-5, with 1 representing the most peaceful countries and 5 representing the least peaceful countries. Areas incorporated into this index include ongoing domestic and international conflict and the level of harmony or discord within a nation. Specific indicator examples include duration of involvement in conflicts, crime rates, violent demonstrations, and internal displacement (Institute for Economics & Peace, 2022).
+- **Gender Inequality Index**: Values fall on a continuous scale ranging from 0-1, with 1 indicating higher disparity. It measures gender inequality in three areas: reproductive health, empowerment, and economic status (UNDP, 2022).
+- **Economy Status**: Values fall on a continuous scale ranging from 1-10, with 10 indicating higher economy status. It scores countries base on the level of socioeconomic development, the organization of the market and competition, currency and price stability, private property, the welfare regime, economic performance, and sustainability (Donner et al., 2022).
+- **Population**: Values are the population of a country in millions (Feenstra et al., 2015).
+- **Adult Literacy Rate**: Values are the percentage of people ages 15 and above who can with understanding, read and write a short, simple statement on their everyday life (World Bank, 2023).
+
+More information on each variable can be found in _Figure 1_ and _Table 1_.
+
+### _Figure 1: Distribution of Women's Political Empowerment and Levels of Peacefulness_
+```{r, width = 10, height = 6, include=TRUE}
+p1 = df %>%
+  ggplot(aes(vdem_gender)) +
+  geom_histogram(bins = 15, color = 'white', fill = '#af4b91') +
+  labs(x = 'Women\'s Political Empowerment \n(0 = low, 1 = high)') +
+  theme_minimal()
+
+p2 = df %>%
+  ggplot(aes(gpi_gpi)) +
+  geom_histogram(bins = 15, color = 'white', fill = '#d7642c') +
+  labs(x = 'Level of Peacefulness \n(1 = high, 5 = low)', y = '') +
+  theme_minimal()
+
+layout = 'AB'
+
+p1 + p2 + guide_area() +
+  plot_layout(design = layout)
+```
+
+### _Table 1: Descriptive Statistics_
+```{r, include=TRUE}
+# rename variables for tables
+renamed_df = df %>%
+  mutate(`Global Peace` = gpi_gpi,
+         `Women's Political Empowerment` = vdem_gender,
+         `Gender Inequality` = gii_gii,
+         `Economy Status` = bti_mes,
+         Population = pwt_pop,
+         `Adult Literacy` = wdi_litrad)
+
+# descriptive statistics
+summary_gpi = summarize(renamed_df,
+                        variable = "Global Peace",
+                        min = round(min(gpi_gpi, na.rm = TRUE), 1),
+                        max = round(max(gpi_gpi, na.rm = TRUE), 1),
+                        mean = round(mean(gpi_gpi, na.rm = TRUE), 1),
+                        median = round(median(gpi_gpi, na.rm = TRUE), 1))
+
+summary_vdem = summarize(renamed_df,
+                         variable = "Women's Political Empowerment",
+                         min = round(min(vdem_gender, na.rm = TRUE), 1),
+                         max = round(max(vdem_gender, na.rm = TRUE), 1),
+                         mean = round(mean(vdem_gender, na.rm = TRUE), 1),
+                         median = round(median(vdem_gender, na.rm = TRUE), 1))
+
+summary_gii_gii = summarize(renamed_df,
+                            variable = "Gender Inequality",
+                            min = round(min(gii_gii, na.rm = TRUE), 1),
+                            max = round(max(gii_gii, na.rm = TRUE), 1),
+                            mean = round(mean(gii_gii, na.rm = TRUE), 1),
+                            median = round(median(gii_gii, na.rm = TRUE), 1))
+
+summary_bti_mes = summarize(renamed_df,
+                            variable = "Economy Status",
+                            min = round(min(bti_mes, na.rm = TRUE), 1),
+                            max = round(max(bti_mes, na.rm = TRUE), 1),
+                            mean = round(mean(bti_mes, na.rm = TRUE), 1),
+                            median = round(median(bti_mes, na.rm = TRUE), 1))
+
+summary_pwt_pop = summarize(renamed_df,
+                            variable = "Population",
+                            min = round(min(pwt_pop, na.rm = TRUE), 1),
+                            max = round(max(pwt_pop, na.rm = TRUE), 1),
+                            mean = round(mean(pwt_pop, na.rm = TRUE), 1),
+                            median = round(median(pwt_pop, na.rm = TRUE), 1))
+
+
+summary_wdi_litrad = summarize(renamed_df,
+                               variable = "Adult Literacy",
+                               min = round(min(wdi_litrad, na.rm = TRUE), 1),
+                               max = round(max(wdi_litrad, na.rm = TRUE), 1),
+                               mean = round(mean(wdi_litrad, na.rm = TRUE), 1),
+                               median = round(median(wdi_litrad, na.rm = TRUE), 1))
+
+summary_combined = bind_rows(`Global Peace` = summary_gpi, 
+                             `Women's Political Empowerment` = summary_vdem,
+                             `Gender Inequality` = summary_gii_gii,
+                             `Economy Status` = summary_bti_mes,
+                             Population = summary_pwt_pop,
+                             `Adult Literacy` = summary_wdi_litrad)
+
+kable(summary_combined) %>%
+  kable_styling(font_size = 100)
+```
+
+# Results
+
+To determine the relationship between women’s political empowerment and world peace, I create a linear regression model that used the `Women's Political Empowerment` variable as the independent variable and `Global Peace` as the dependent variable. Results can be seen in _Table 2_. The variable to measure peace is a range from 1 (most peaceful) to 5 (least peaceful) and the variable to measure empowerment is a range from 0 (least empowered)  to 1 (most empowered) so the negative relationship presented by the data can be interpreted as a positive relationship between more peace and greater empowerment.
+
+I produced additional linear regression models adding potential confounding variables. In the second linear regression model, I added `Gender Inequality` to account for other areas of gender inequality in a country that could affect peace. In the third linear regression model, I added economic status, population, and literacy as measured by the variables `Economy Status`, `Population`, and `Adult Literacy`. Results can be seen in _Table 2_.
+
+### _Table 2: Linear Regression Models_
+```{r, width = 10, include=TRUE}
+mods = list(
+  '(1)' = lm(`Global Peace` ~ `Women's Political Empowerment`, renamed_df),
+  '(2)' = lm(`Global Peace` ~ `Women's Political Empowerment` + `Gender Inequality`, renamed_df),
+  '(3)' = lm(`Global Peace` ~ `Women's Political Empowerment` + `Economy Status` + Population + `Gender Inequality` + `Adult Literacy`, renamed_df)
+)
+
+model = modelsummary(mods, fmt = 2, gof_map = 'nobs', output = 'kableExtra', statistic = NULL,
+             stars = c('*' = 0.05))
+
+model %>%
+  kable_styling(font_size = 100)
+```
+
+
+### _Figure 2: Relationship Between Women\'s Political Empowerment and Peace_
+```{r, include=TRUE}
+df = df %>%
+  mutate(gii_bi = if_else(gii_gii > 0.5, 1, 0))
+
+df$gii_bi <- as.factor(df$gii_bi)
+
+df %>%
+  ggplot(aes(vdem_gender, gpi_gpi)) +
+  geom_point(color = '#d7642c', size = 4, alpha = 0.5) +
+  geom_smooth(method = lm, se=F, lwd=2, color='#af4b91') +
+  labs(y = 'Level of Peacefulness', x = 'Women\'s Political Empowerment') +
+  theme(axis.text.x = element_text(size = 100),
+        axis.title.x = element_text(size = 100),
+        axis.text.y = element_text(size = 100),
+        axis.title.y = element_text(size = 100)) +
+  theme_minimal()
+```
+
+# Findings
+
+The results from these linear regression models produces the expected result, meaning that there is a statistically significant relationship between women’s political empowerment and world peace. I found that countries with greater women’s political empowerment are associated with higher levels of peace. This relationship is visually represented in _Figure 2_. While these findings to not prove causation, this correlation is consistent with the arguments presented by Hudson et al. and can be used to justify policies and programs to enhance women’s political empowerment globally with the intention of creating a more peaceful world.
+
+# References
+
+<font size="8">Dahlberg, S., Sundström, A., Holmberg, S., Rothstein, B., Pachon, N. A., Dalli, C. M., Valverde, R. L., & Nilsson, P. (2024). The quality of government basic dataset, version Jan24. _University of Gothenburg: The Quality of Government Institute._ https://www.gu.se/en/quality-government 
+
+Donner, S., Hartmann, H., Härterich, C., & Steinkamp, S. (2022). Transformation index of the bertelsmann stiftung 2022. _Bertelsmann Stiftung._ http://www.bti-project.org
+
+Feenstra, R. C., Inklaar, R., & Timmer, M. P. (2015). The next generation of the penn world table. _The American Economic Review, 105_(10), 3150–3182. www.ggdc.net/pwt
+
+Hudson, V., Ballif-Spanvill, B., Caprioli, M., & Emmett, C. (2014). Sex and world peace. _Colombia University Press._
+
+Institute for Economics and Peace. (2022). Global peace index 2022: Measuring peace in a complex world. http://visionofhumanity.org/resources
+
+Pemstein, D., Marquardt, K. L., Tzelgov, E., Wang, Y.-t., Medzihorsky, J., Krusell, J., Miri, F., & von Römer, J. (2023). The v-dem measurement model: Latent variable analysis for cross- national and cross-temporal expert-coded data. _Varieties of Democracy Institute Working Paper, 21_(8th Ed). https://v-dem.net/wp.html
+
+United Nations Development Program. (2022). Gender inequality index. http://hdr.undp.org/ en/content/gender-inequality-index-gii
+
+World Bank. (2023). World development indicators. https://databank.worldbank.org/source/ world-development-indicators</font>
